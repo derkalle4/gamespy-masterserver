@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CoreConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <UDPHeartbeatPort>27900</UDPHeartbeatPort>
+  <UDPFWCheckPort>27920</UDPFWCheckPort>
+  <UDPHeartbeatAddress>0.0.0.0</UDPHeartbeatAddress>
+  <TCPQueryPort>28910</TCPQueryPort>
+  <TCPQueryAddress>0.0.0.0</TCPQueryAddress>
+  <GameserverTimeout>120</GameserverTimeout>
+  <PlayerTimeout>120</PlayerTimeout>
+  <LogToFile>false</LogToFile>
+  <LogFileName>/log.txt</LogFileName>
+  <Loglevel>2</Loglevel>
+  <MySQLHostname>localhost</MySQLHostname>
+  <MySQLPort>3306</MySQLPort>
+  <MySQLDatabase>gamemaster</MySQLDatabase>
+  <MySQLUsername>root</MySQLUsername>
+  <MySQLPwd />
+  <ServerID>0</ServerID>
+  <P2PPort>14130</P2PPort>
+  <P2PAddress>0.0.0.0</P2PAddress>
+  <P2PEnable>false</P2PEnable>
+  <P2PKey>abcd</P2PKey>
+</CoreConfig>
