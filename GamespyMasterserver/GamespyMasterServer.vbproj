@@ -76,14 +76,16 @@
     <Compile Include="ArrayFunctions.vb" />
     <Compile Include="class\gameserver\DynamicFieldStorage.vb" />
     <Compile Include="class\gameserver\GamespyPlayer.vb" />
-    <Compile Include="class\network\packets [tcp]\ErrorReportPacket.vb" />
-    <Compile Include="class\packets [udp]\GameAvailiablePacket.vb" />
     <Compile Include="class\network\packets [tcp]\MessagePacket.vb" />
     <Compile Include="class\network\packets [tcp]\ServerinfoRequestPacket.vb" />
-    <Compile Include="class\packets [udp]\HeartbeatAckdPacket.vb" />
-    <Compile Include="class\packets [udp]\ClientMessagePacket.vb" />
+    <Compile Include="class\network\packets [udp]\ChallengeRequestPacket.vb" />
+    <Compile Include="class\network\packets [udp]\ClientMessagePacket.vb" />
+    <Compile Include="class\network\packets [udp]\GameAvailiablePacket.vb" />
+    <Compile Include="class\network\packets [udp]\HandshakePacket.vb" />
+    <Compile Include="class\network\packets [udp]\HeartbeatAckdPacket.vb" />
+    <Compile Include="class\network\packets [udp]\ServerHeartbeatPacket.vb" />
+    <Compile Include="class\network\packets [udp]\ServerRegisterPacket.vb" />
     <Compile Include="DebugHelper.vb" />
-    <Compile Include="P2PCipher.vb" />
     <Compile Include="SapphireII.vb" />
     <Compile Include="linkbase\config\ConfigSerializer.vb" />
     <Compile Include="class\config\CoreConfig.vb" />
@@ -94,8 +96,6 @@
     <Compile Include="linkbase\ms\P2PServerHandler.vb" />
     <Compile Include="linkbase\ms\P2PUdpPacket.vb" />
     <Compile Include="linkbase\mysql\MySQLHandler.vb" />
-    <Compile Include="class\packets [udp]\HandshakePacket.vb" />
-    <Compile Include="class\packets [udp]\ServerHeartbeatPacket.vb" />
     <Compile Include="linkbase\packets\GamespyUdpPacket.vb" />
     <Compile Include="linkbase\packets\GamespyTcpPacket.vb" />
     <Compile Include="class\network\GamespyClient.vb" />
@@ -103,8 +103,6 @@
     <Compile Include="class\network\packets [tcp]\ListRequestPacket.vb" />
     <Compile Include="linkbase\Logger.vb" />
     <Compile Include="linkbase\packets\PacketBase.vb" />
-    <Compile Include="class\packets [udp]\ChallengeRequestPacket.vb" />
-    <Compile Include="class\packets [udp]\ServerRegisterPacket.vb" />
     <Compile Include="class\gameserver\GamespyGameServer.vb" />
     <Compile Include="class\network\TcpServer.vb" />
     <Compile Include="linkbase\UdpServer.vb" />
@@ -144,7 +142,6 @@
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
-    <None Include="linkbase\App.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

@@ -17,3 +17,11 @@ C:\Users\Jan\Documents\GamespyMasterServer\GamespyMasterServer\obj\Debug\Gamespy
 C:\Users\Jan\Documents\GamespyMasterServer\GamespyMasterServer\obj\Debug\GamespyMasterServer.xml
 C:\Users\Jan\Documents\GamespyMasterServer\GamespyMasterServer\obj\Debug\GamespyMasterServer.pdb
 C:\Users\Jan\Documents\GamespyMasterServer\GamespyMasterServer\obj\Debug\GamespyMasterServer.vbprojResolveAssemblyReference.cache
+F:\git\GamespyMasterserver\GamespyMasterServer\bin\Debug\GamespyMasterServer.exe
+F:\git\GamespyMasterserver\GamespyMasterServer\bin\Debug\GamespyMasterServer.pdb
+F:\git\GamespyMasterserver\GamespyMasterServer\bin\Debug\GamespyMasterServer.xml
+F:\git\GamespyMasterserver\GamespyMasterServer\obj\Debug\GamespyMasterServer.Resources.resources
+F:\git\GamespyMasterserver\GamespyMasterServer\obj\Debug\GamespyMasterServer.vbproj.GenerateResource.Cache
+F:\git\GamespyMasterserver\GamespyMasterServer\obj\Debug\GamespyMasterServer.exe
+F:\git\GamespyMasterserver\GamespyMasterServer\obj\Debug\GamespyMasterServer.xml
+F:\git\GamespyMasterserver\GamespyMasterServer\obj\Debug\GamespyMasterServer.pdb

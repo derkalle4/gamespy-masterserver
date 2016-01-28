@@ -141,7 +141,7 @@ Public Class GamespyGameserver
 
         While index < (arr.Length - 1)
             Array.Resize(header, header.Length + 1)
-            header(header.Length - 1) = GrabZeroDelimetedString(arr, index)
+            header(header.Length - 1) = GetCString(arr, index)
             If arr(index) = 0 Then Exit While
         End While
         index += 1 'Add +1 to compensate the x0 x0 delimeter
@@ -150,7 +150,7 @@ Public Class GamespyGameserver
 
         For i = 0 To rowCount - 1
             For j = 0 To header.Length - 1
-                data(i, j) = GrabZeroDelimetedString(arr, index)
+                data(i, j) = GetCString(arr, index)
             Next
         Next
         index += 1 'Add +1 to compensate the x0 x0 delimeter
