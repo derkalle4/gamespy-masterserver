@@ -1,4 +1,5 @@
 ﻿'Packet for the "Details" and "Players" section in the serverlist
+'Also required for "direct" connect (swbf1)
 '(only used for servers with restrictive NAT)
 'JW "LeKeks" 09/2014
 Public Class ServerinfoRequestPacket
@@ -92,8 +93,8 @@ Public Class ServerinfoRequestPacket
 
         'Attach every server-property
         For Each field As DataPair In gServer.DynamicStorage.FieldList
-            ConcatArray(GetBytes(field.varName), buf, 0)
-            ConcatArray(GetBytes(field.value), buf, 0)
+            ArrayFunctions.ConcatArray(ArrayFunctions.GetBytes(field.varName), buf, 0)
+            ArrayFunctions.ConcatArray(ArrayFunctions.GetBytes(field.value), buf, 0)
         Next
     End Sub
 
