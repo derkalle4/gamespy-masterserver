@@ -2,7 +2,9 @@
 'JW "LeKeks" 05/2014
 Imports System.Reflection
 Public Class GamespyGameserver
+
     Public Const BYTE_ZERO As Byte = 0
+    'Generating Null-Chars, vbNull might be different from chr(0) depending on the charset and target framework
     Private doubleNull As String = ArrayFunctions.GetString({BYTE_ZERO, BYTE_ZERO})
     Private null As String = ArrayFunctions.GetString({BYTE_ZERO})
 
@@ -33,8 +35,8 @@ Public Class GamespyGameserver
     Public Property StateChanged As String = "0"
     Public Property GameName As String = "?"
 
-    Public Property ChallengeOK As Boolean = False '-> Server scheint OK zu sein
-    Public Property HandshakeOK As Boolean = False '-> Port ist offen
+    Public Property ChallengeOK As Boolean = False '-> server seems to work properly
+    Public Property HandshakeOK As Boolean = False '-> port is accessible from WAN
     Public Property ClientID As Int32
 
     Public Property LastHeartbeat As Date
@@ -105,7 +107,7 @@ Public Class GamespyGameserver
             Dim parameterArray() As Byte = Nothing
             'Start by splitting the source array if there's a \x0\x0\x0 delimeter
             'which is caused by attaching at least 3 C-style strings
-            SliceArray(buf, parameterArray, {BYTE_ZERO, BYTE_ZERO, BYTE_ZERO})
+            ArrayFunctions.SliceArray(buf, parameterArray, {BYTE_ZERO, BYTE_ZERO, BYTE_ZERO})
             'process the parameter-array
             Me.ParseParameters(parameterArray)
 
@@ -141,7 +143,7 @@ Public Class GamespyGameserver
 
         While index < (arr.Length - 1)
             Array.Resize(header, header.Length + 1)
-            header(header.Length - 1) = GrabZeroDelimetedString(arr, index)
+            header(header.Length - 1) = GetCString(arr, index)
             If arr(index) = 0 Then Exit While
         End While
         index += 1 'Add +1 to compensate the x0 x0 delimeter
@@ -150,7 +152,7 @@ Public Class GamespyGameserver
 
         For i = 0 To rowCount - 1
             For j = 0 To header.Length - 1
-                data(i, j) = GrabZeroDelimetedString(arr, index)
+                data(i, j) = GetCString(arr, index)
             Next
         Next
         index += 1 'Add +1 to compensate the x0 x0 delimeter
@@ -196,6 +198,19 @@ Public Class GamespyGameserver
             val = propInfo.GetValue(Me)
         End If
         Return val
+    End Function
+
+    Public Function HasKey(ByVal varName As String) As Boolean
+        Dim propInfo As PropertyInfo = GetType(GamespyGameserver).GetProperty(varName, BindingFlags.Public + BindingFlags.Instance + BindingFlags.IgnoreCase)
+        Dim val As String = String.Empty
+        If propInfo Is Nothing Then
+            'Search the dynamic params
+            val = Me.DynamicStorage.GetValue(varName)
+            If val = String.Empty Then
+                Return False
+            End If
+        End If
+        Return True
     End Function
 
     Private Function IsLocalIp(ByVal addr As String) As Boolean

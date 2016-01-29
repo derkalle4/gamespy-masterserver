@@ -282,7 +282,7 @@ Public Class MSMysqlHandler
             End Using
         End SyncLock
     End Function
-   
+
     Public Function GetManagingMasterserver(ByVal rIPEP As Net.IPEndPoint) As MasterServer
         SyncLock Me.connection
             Dim sql As String =
@@ -399,6 +399,34 @@ Public Class MSMysqlHandler
         End SyncLock
     End Function
 
+    Public Function GetServerGroups(ByVal gamename As String) As List(Of GamespyServerGroup)
+        'filter = " and gamever = '1.0' "
+        gamename = Me.CorrectGameType(gamename)
+        SyncLock Me.connection
+            Dim sql As String = "select * from  `v_master_groups` where key_gamename = '" & EscapeString(gamename) & "'"
+            Using res As MySqlDataReader = Me.DoQuery(sql)
+                Dim groups As New List(Of GamespyServerGroup)
+                If Not res Is Nothing Then
+                    While res.Read
+                        groups.Add(Me.BuildServerGroup(res))
+                    End While
+                    res.Close()
+                End If
+
+                Return groups
+            End Using
+        End SyncLock
+    End Function
+    Private Function BuildServerGroup(ByVal reader As MySqlDataReader) As GamespyServerGroup
+        Dim group As New GamespyServerGroup
+        With group
+            'TODO join num fields
+            .Hostname = reader("group_hostname")
+            .locale = reader("group_locale")
+            .Id = reader("id")
+        End With
+        Return group
+    End Function
 
     'Corrects wrong Gametypes
     Private Function CorrectGameType(ByVal type As String) As String

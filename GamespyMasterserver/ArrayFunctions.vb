@@ -82,7 +82,7 @@ Module ArrayFunctions
     End Sub
 
     'Reads until next 0x0, converts to String
-    Public Function GrabZeroDelimetedString(ByVal arr() As Byte, ByRef offset As Int32) As String
+    Public Function GetCString(ByVal arr() As Byte, ByRef offset As Int32) As String
         Dim index As Int32 = Array.IndexOf(arr, Convert.ToByte(0), offset)
         If index < 0 Then Return String.Empty
         Dim buf(index - offset - 1) As Byte

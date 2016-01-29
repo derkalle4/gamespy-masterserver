@@ -199,8 +199,8 @@ Public Class GamespyClient
         offset += 3 + 4 'skip 4-byte flag
 
         'fetch gamenames
-        Me.GameName = ArrayFunctions.GrabZeroDelimetedString(buffer, offset)
-        Me.QueryName = ArrayFunctions.GrabZeroDelimetedString(buffer, offset)
+        Me.GameName = ArrayFunctions.GetCString(buffer, offset)
+        Me.QueryName = ArrayFunctions.GetCString(buffer, offset)
 
         'check if there's a valid challenge
         If buffer.Length - offset < 8 Then

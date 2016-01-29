@@ -28,43 +28,27 @@ Public Class ListRequestPacket
         'Header
         ConcatArray(Me.client.RemoteIPEP.Address.GetAddressBytes(), buffer)
         'ConcatArray({25, 100}, buffer) 'TODO: fetch port from db
-        ConcatArray(BuildInvertedUInt16Array(6501), buffer)
-        'checking query state via bitwise and
+        ConcatArray(BuildInvertedUInt16Array(6500), buffer)
 
-        'If Me.Options And GS_FLAG_SEND_GROUPS Then
-        'grouped server query (EaW p.e.)
-        'ConcatArray({Me.ParameterArray.Length - 1, 0}, buffer)
-        'ConcatArray(Me.BuildParameterArray(), buffer)
-
-        'Dim flags As Byte
-        'flags = flags Or GS_FLAG_UNSOLICITED_UDP
-        'flags = flags Or GS_FLAG_HAS_FULL_RULES
-        'flags = flags Or GS_FLAG_HAS_KEYS
-
-        'ConcatArray({flags}, buffer)
-        'ConcatArray({127, 0, 0, 1}, buffer) 'empty ipa
-        'PushString(buffer, "LEKEKS")
-        'PushString(buffer, "1")
-        'PushString(buffer, "10")
-        'PushString(buffer, "4")
-        'PushString(buffer, "3")
-        'PushString(buffer, "0")
-        'PushString(buffer, "1", False)
-
-        'ConcatArray({&H0, &HFF, &HFF, &HFF, &HFF}, buffer)
-
-        'Logger.Log("Grouping data values for {0}", LogLevel.Verbose, Me.client.GameName)
         If Not (Me.Options = GS_FLAG_NO_SERVER_LIST) Then 'Me.ParameterArray.Count > 1 Then
             ConcatArray({Me.ParameterArray.Length - 1, 0}, buffer)
             ConcatArray(Me.BuildParameterArray(), buffer)
 
-            Dim servers As List(Of GamespyGameserver) = Me.client.server.MySQL.GetServers(Me.client.GameName, Me.client.server.Config.GameserverTimeout)
-            Logger.Log("Fetched {0} active servers from database. ({1})", LogLevel.Verbose, servers.Count.ToString)
+            If Me.Options = GS_FLAG_SEND_GROUPS Then
+                Dim groups As List(Of GamespyServerGroup) = Me.client.server.MySQL.GetServerGroups(Me.client.GameName)
+                Logger.Log("Fetched {0} active groups from database. ({1})", LogLevel.Verbose, groups.Count.ToString())
+                For Each group As GamespyServerGroup In groups
+                    Me.AttachGroup(group, buffer)
+                Next
+            Else
+                Dim servers As List(Of GamespyGameserver) = Me.client.server.MySQL.GetServers(Me.client.GameName, Me.client.server.Config.GameserverTimeout)
+                Logger.Log("Fetched {0} active servers from database. ({1})", LogLevel.Verbose, servers.Count.ToString())
+                For Each server As GamespyGameserver In servers
+                    If server.ChallengeOK = False Then Continue For 'don't list unauthenticated servers
+                    Me.AttachServer(server, buffer)
+                Next
+            End If
 
-            For Each server As GamespyGameserver In servers
-                If server.ChallengeOK = False Then Continue For 'don't list unauthenticated servers
-                Me.BuildServerEntry(server, buffer)
-            Next
             ConcatArray({&H0, &HFF, &HFF, &HFF, &HFF}, buffer) 'set last bytes, \xFF\xFF\xFF\xFF indicates last server
         Else
             Logger.Log("Sending header to {0}.", LogLevel.Verbose, Me.client.RemoteIPEP.ToString())
@@ -73,7 +57,21 @@ Public Class ListRequestPacket
         Return buffer
     End Function
 
-    Private Sub BuildServerEntry(ByVal server As GamespyGameserver, ByRef buffer() As Byte)
+    Private Sub AttachGroup(ByVal group As GamespyServerGroup, ByRef buffer() As Byte)
+        ConcatArray({GS_FLAG_HAS_KEYS}, buffer)
+
+        Dim gid() As Byte = BitConverter.GetBytes(group.Id)
+        Array.Reverse(gid)  'ntohl
+        ConcatArray(gid, buffer)
+
+        ConcatArray({255}, buffer) 'Attach a delimeter indicating that there's new data here
+        For i = 1 To Me.ParameterArray.Length - 1 'Try to attach every desired param
+            Dim val As String = group.GetValue(Me.ParameterArray(i))
+            Me.PushString(buffer, val, (i = Me.ParameterArray.Length - 1))
+        Next
+    End Sub
+
+    Private Sub AttachServer(ByVal server As GamespyGameserver, ByRef buffer() As Byte)
         If server.PortClosed And Me.ParameterArray.Length < 2 Then Return
         Dim serverFlags As Byte = 0
         Dim ip0 As Net.IPAddress = Nothing
@@ -89,11 +87,14 @@ Public Class ListRequestPacket
             ToggleFlag(serverFlags, GS_FLAG_HAS_KEYS)
             ToggleFlag(serverFlags, GS_FLAG_ICMP_IP)
         Else
-            If server.IsNatted And Not server.PortClosed Then '85
+            'TODO: fix
+            'GS_FLAG_NONSTANDARD_PRIVATE_PORT needed for PeerchatRoomMangle!
+            If server.IsNatted And Not server.PortClosed And False And (Me.Options <> 4) Then '85
+                ToggleFlag(serverFlags, GS_FLAG_PRIVATE_IP)
                 ToggleFlag(serverFlags, GS_FLAG_HAS_KEYS)
                 ToggleFlag(serverFlags, GS_FLAG_UNSOLICITED_UDP)
 
-            ElseIf server.PortClosed Then '126
+            ElseIf server.PortClosed Or True Then '126
                 ToggleFlag(serverFlags, GS_FLAG_PRIVATE_IP)
                 ToggleFlag(serverFlags, GS_FLAG_NONSTANDARD_PRIVATE_PORT)
                 ToggleFlag(serverFlags, GS_FLAG_HAS_KEYS)
@@ -111,10 +112,16 @@ Public Class ListRequestPacket
         'TODO: add compatibility for peerchat-lobbys
         'This implementation is critical: changing to the localip will cause wrong hash-calculations
         'for the peerchat lobby-system -> maybe detect peerchat games
-        If server.PublicIP = Me.client.RemoteIPEP.Address.ToString And server.IsNatted And Not server.PortClosed And hasLocalIP Then
+        If server.PublicIP = Me.client.RemoteIPEP.Address.ToString And server.IsNatted And Not server.PortClosed And hasLocalIP And False Then
             ConcatArray(ip0.GetAddressBytes, buffer)
-            'TODO: hostport might be wrong, check for localport instead
-            ConcatArray(ArrayFunctions.BuildInvertedUInt16Array(UInt16.Parse(server.HostPort)), buffer)
+
+            'it seems to depend on the game which port is used
+            If (server.HasKey("localport")) Then
+                ConcatArray(ArrayFunctions.BuildInvertedUInt16Array(UInt16.Parse(server.GetValue("localport"))), buffer)
+            Else
+                ConcatArray(ArrayFunctions.BuildInvertedUInt16Array(UInt16.Parse(server.HostPort)), buffer)
+            End If
+
         Else
             ConcatArray(Net.IPAddress.Parse(server.PublicIP).GetAddressBytes, buffer)       'IP-Address
             ConcatArray(ArrayFunctions.BuildInvertedUInt16Array(UInt16.Parse(server.PublicPort)), buffer)  'Port
@@ -123,7 +130,7 @@ Public Class ListRequestPacket
         If serverFlags And GS_FLAG_PRIVATE_IP Then   'Attach natneg-params
             If Not hasLocalIP Then Return
             Dim lport As UInt16 = server.PublicPort
-            UInt16.TryParse(server.GetValue("localport"), lport)
+            'UInt16.TryParse(server.GetValue("localport"), lport)
             ConcatArray(ip0.GetAddressBytes(), buffer)
             ConcatArray(ArrayFunctions.BuildInvertedUInt16Array(lport), buffer)
         End If
